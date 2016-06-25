@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<launch>
+  <group ns="uav1">
+    <node pkg="teamshield" type="uav" name="uav">
+  </group>
+
+  <group ns="uav2">
+    <node pkg="teamshield" type="uav" name="uav">
+  </group>
+
+  <group ns="uav3">
+    <node pkg="teamshield" type="uav" name="uav">
+  </group>
+
+  <group ns="uav4">
+    <node pkg="teamshield" type="uav" name="uav">
+  </group>
+
+</launch>
