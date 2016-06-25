@@ -6,6 +6,8 @@ project(teamshield)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  message_generation
+  genmsg
   roscpp
   rospy
 )
@@ -21,12 +23,16 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message2.msg
 # )
 
+add_service_files(
+  FILES
+  GetMeasurement.srv
+)
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
