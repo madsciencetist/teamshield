@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 
 <launch>
+  <param name="/swarm_size" value="4"/>
+
   <group ns="uav1">
     <node pkg="teamshield" type="uav" name="uav" output="screen"/>
     <node pkg="teamshield" type="estimator.py" name="estimator" output="screen"/>
