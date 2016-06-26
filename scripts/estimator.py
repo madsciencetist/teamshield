@@ -11,22 +11,19 @@ class Estimator:
     def current_location_callback(self, current_location):
         rospy.loginfo("I am at %f %f %f", current_location.x, current_location.y, current_location.z);
 
+        try:
+            response = self.get_measurement(current_location.x, current_location.y, current_location.z)
+        except rospy.ServiceException, e:
+            rospy.loginfo("Service call failed: %s", e);
+            return
 
-        in_new_cell = True # logic required here
-        if in_new_cell:
-            try:
-                response = self.get_measurement(current_location.x, current_location.y, current_location.z)
-            except rospy.ServiceException, e:
-                rospy.loginfo("Service call failed: %s", e);
-                return
+        location_xyz = (current_location.x, current_location.y, current_location.z)
+        self.q_tree.add_measurement_xyz(response.measurement, location_xyz)
 
-            location_xyz = (current_location.x, current_location.y, current_location.z)
-            self.q_tree.add_measurement_xyz(response.measurement, location_xyz)
+        # Send map
+        qtmap_msg = pickle.dumps(self.q_tree)
+        self.map_pub.publish(qtmap_msg)
 
-            # Send map
-            qtmap_msg = pickle.dumps(self.q_tree)
-            self.map_pub.publish(qtmap_msg)
-            
     def qtmap_callback(self, qtmap_msg):
         qtmap = pickle.loads(qtmap_msg.data)
         #self.q_tree.merge_trees(qtmap) uncomment this when merge_trees is done
