@@ -10,8 +10,9 @@ from teamshield.srv import GetMeasurement, GetMeasurementResponse
 
 class WorldLoader:
     def __init__(self):
-        self.min_z = rospy.get_param("/min_z", 1)  # altitude
-        self.max_z = rospy.get_param("/max_z", 1)  # altitude
+        self.min_z = rospy.get_param("/min_z", 0)       # altitude (m)
+        self.max_z = rospy.get_param("/max_z", 9800)    # altitude (m)
+        self.layer_num = rospy.get_param("/layer_num", 5)
         self.axis_size = rospy.get_param("/axis_size", 128)
         # Assumption: Data loaded row-major
         self.world_array = self.generate_world(max_n=self.axis_size)
@@ -21,11 +22,14 @@ class WorldLoader:
         res = 0.0
         if not (req.x < 0 or np.size(self.world_array, axis=1) < req.x or \
             req.y < 0 or np.size(self.world_array, axis=0) < req.y):
-            res = self.world_array[req.x, req.y]
+            res = self.occl(self.world_array[req.x, req.y], req.z)
         else:
             rospy.logwarn("Location out of bounds requested")
             res = 0.0
         return GetMeasurementResponse(res)
+
+    def occl(self, cell_val, z):
+        return (cell_val * (z - self.min_z)) / (self.max_z - self.min_z)
 
     def generate_world(self, num_centers=8, max_n=128):
         X = np.zeros((max_n * max_n, 2))
