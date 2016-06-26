@@ -106,10 +106,10 @@ class Root(QuadTree):
                 bbox = (results.x_min, results.x_max, results.y_min, results.y_max)
                 self._split(bbox, results)
 
-    def add_measurement(self, measurement, location_xyz)
-        location_xy = location_xyz(0:2)
+    def add_measurement(self, measurement, location_xyz):
+        location_xy = location_xyz[0:2]
         level = 1 # TODO compute the level
-        add_measurement(measurement, location_xy, level):
+        add_measurement(measurement, location_xy, level)
 
 
 
