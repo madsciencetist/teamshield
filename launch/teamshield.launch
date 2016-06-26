@@ -5,10 +5,16 @@
 
   <node pkg="teamshield" type="world_loader.py" name="world_loader"/>
 
-  <group ns="uav1">
+  <group ns="uav0">
     <node pkg="teamshield" type="uav" name="uav" output="screen"/>
     <node pkg="teamshield" type="estimator.py" name="estimator" output="screen"/>
     <node pkg="teamshield" type="planner.py" name="planner" output="screen"/>
+  </group>
+
+  <group ns="uav1">
+    <node pkg="teamshield" type="uav" name="uav"/>
+    <node pkg="teamshield" type="estimator.py" name="estimator"/>
+    <node pkg="teamshield" type="planner.py" name="planner"/>
   </group>
 
   <group ns="uav2">
@@ -18,12 +24,6 @@
   </group>
 
   <group ns="uav3">
-    <node pkg="teamshield" type="uav" name="uav"/>
-    <node pkg="teamshield" type="estimator.py" name="estimator"/>
-    <node pkg="teamshield" type="planner.py" name="planner"/>
-  </group>
-
-  <group ns="uav4">
     <node pkg="teamshield" type="uav" name="uav"/>
     <node pkg="teamshield" type="estimator.py" name="estimator"/>
     <node pkg="teamshield" type="planner.py" name="planner"/>
