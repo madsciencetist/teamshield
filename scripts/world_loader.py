@@ -18,7 +18,6 @@ class WorldLoader:
         filename = os.path.abspath(rospy.get_param("/filename", "files/occlusion.csv"))
         self.min_z = rospy.get_param("/min_z", 1500)       # altitude (m)
         self.max_z = rospy.get_param("/max_z", 9800)    # altitude (m)
-        self.layer_num = rospy.get_param("/layer_num", 6)
         self.max_n = rospy.get_param("/max_n", 128)
         # Assumption: Data loaded row-major
         # self.world_environment = self.generate_environment()
