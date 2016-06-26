@@ -14,13 +14,13 @@ def create_uav_location_callback(i):
 
 class Planner:
   def current_location_callback(self, my_location):
-      rospy.loginfo("I am at %f %f %f", my_location.x, my_location.y, my_location.z);      
+      rospy.loginfo("I am at %f %f %f", my_location.x, my_location.y, my_location.z);
 
       for i in range(0, self.swarm_size):
         rospy.loginfo("UAV %d is at %f %f %f", i, uav_location[i].x, uav_location[i].y, uav_location[i].z)
-      
+
       #what level am I on?
-      
+
       #what other uav's are in my level?
 
       goal = Point()
@@ -37,29 +37,26 @@ class Planner:
       rospy.init_node('estimator')
       self.swarm_size = rospy.get_param('/swarm_size')
       self.map_z_min = rospy.get_param('/min_z')
-      self.map_z_min = rospy.get_param('/max_z')      
-      
+      self.map_z_min = rospy.get_param('/max_z')
+
       agents_left = self.swarm_size
-      
+
       curr_levels = 0;
       agents_for_next_level = 1
-      while (agents_left > 0){
+      while agents_left > 0:
         #alocate an agent to a level
-        agents_left--
-        agents_for_next_level--        
-        
-        if (agents_for_next_level == 0){
-          curr_levels++
+        agents_left -= 1
+        agents_for_next_level -= 1
+
+        if agents_for_next_level == 0:
+          curr_levels += 1
           agents_for_next_level = (curr_levels)*(curr_levels)
-          
+
           #special case for first level
-          if (agents_for_next_level == 1){
-            agents_for_next_level++
-          }
-        }
-      }
+          if agents_for_next_level == 1:
+            agents_for_next_level += 1
       self.num_levels = curr_levels
-      
+
 
       self.q_tree = Root(bbox=(0, 500, 0, 500))
 
