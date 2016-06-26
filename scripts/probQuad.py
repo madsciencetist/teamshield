@@ -23,7 +23,7 @@ class QuadTree:
         self.y_min = y_min
         self.y_max = y_max
         self._depth = _depth
-        self.prob = 1
+        self.prob = 0.5
 
     def _split(self, bbox, ref=None, route=None):
         # find cell x_min, x_max, y_min, y_max
@@ -41,7 +41,7 @@ class QuadTree:
                              QuadTree(x_min, x_min + halfwidth, y_min+halfheight, y_max, _depth=new_depth),
                              QuadTree(x_min+halfwidth, x_max, y_min+halfheight, y_max, _depth=new_depth)]
 
-            pn = self.prob/4
+            pn = self.prob
             for node in self.children:
                 node.prob = pn
         else:
@@ -51,19 +51,9 @@ class QuadTree:
                              QuadTree(x_min, x_min + halfwidth, y_min+halfheight, y_max, _depth=new_depth),
                              QuadTree(x_min+halfwidth, x_max, y_min+halfheight, y_max, _depth=new_depth)]
 
-            pn = ref.prob/4
+            pn = ref.prob
             for node in ref.children:
                 node.prob = pn
-
-            # for r in route:
-            #     self.children[r]
-
-
-
-        # nodes = self.nodes
-        # self.nodes = []
-        # for node in nodes:
-        #     self._insert_into_children(node.item, node.rect)
 
     def _find_cell(self, location):
         results = None
@@ -117,17 +107,29 @@ class Root(QuadTree):
             if results is None:
                 bbox = (self.x_min, self.x_max, self.y_min, self.y_max)
                 self._split(bbox)
+            elif c_level > level:
+                print('Currently expecting a more Detailed Resolution!!!!!!!!!!!!!!!!!!!')
+                break
             elif c_level < level:
                 bbox = (results.x_min, results.x_max, results.y_min, results.y_max)
                 self._split(bbox, results, route)
+            if c_level == level:
+                results.prob = measurement
 
-        print(c_level)
+    def merge_trees(self, tree2):
+        test = True
+        t1_children = self.children
+        t2_children = tree2.children
+        while test:
+            for node in t1_children:
+                print('TODO')
+
+        print('TODO')
 
     def add_measurement_xyz(self, measurement, location_xyz):
         location_xy = location_xyz[0:2]
         level = 1 # TODO compute the level
         self.add_measurement(measurement, location_xy, level)
-
 
 
 def get_grid_size(area, max_grid):
@@ -171,9 +173,15 @@ if __name__ == '__main__':
     max_top_grid = 10
 
     q_tree = Root(bbox=(0, 500, 0, 500))
+    q_tree2 = Root(bbox=(0, 500, 0, 500))
     location = (275, 5)
+    location2 = (385, 5)
+    measurement = .85
+    q_tree.add_measurement(0.8, location, level=3)  # TODO: Add more logic for comparing some at different levels
+    q_tree2.add_measurement(0.6, location2, level=2)
 
-    q_tree.add_measurement(location, level=3)
+    q_tree.merge_trees(q_tree2)
+
     # q_tree.get_Probability(x, y)
     #
     # len_bin, num_bins = get_grid_size(total_area, max_top_grid)

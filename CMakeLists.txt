@@ -66,3 +66,7 @@ target_link_libraries(uav
   ${catkin_LIBRARIES}
 )
 
+#add_executable(lane_planner src/planner.cpp)
+#target_link_libraries(lane_planner
+#  ${catkin_LIBRARIES}
+#)
