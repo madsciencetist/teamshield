@@ -17,46 +17,55 @@ def in_range(val, min, max):
 class WorldLoader:
     def __init__(self):
         filename = os.path.abspath(rospy.get_param("/filename", "files/occlusion.csv"))
-        self.min_z = rospy.get_param("/min_z", 1500)
-        self.max_z = rospy.get_param("/max_z", 9800)
+        self.min_z = rospy.get_param("/min_z", 1500.)
+        self.max_z = rospy.get_param("/max_z", 9800.)
         self.max_n = rospy.get_param("/max_n", 128)
-        self.camera_fov = rospy.get_param("/camera_fov", 135)
-        self.m_per_box = rospy.get_param("/m_per_box", 5)
+        self.camera_fov = rospy.get_param("/camera_fov", 135.)
+        self.m_per_box = rospy.get_param("/m_per_box", 5.)
         self.bound_dist = self.max_n * self.m_per_box
         # Assumption: Data loaded row-major
         self.world_env = genfromtxt(filename, delimiter=",")
         self.target = self.generate_targets(8)
-        print(self.world_env.shape)
-        print(self.target)
         self.meas_srv = rospy.Service("get_measurement", GetMeasurement, self.get_measurement)
 
     def get_measurement(self, req):
         res = 0.0
-        if in_range(req.x, 0, np.size(self.world_env, axis=1)) and \
-           in_range(req.y, 0, np.size(self.world_env, axis=0)) and \
-           in_range(req.z, self.min_z, self.max_z):
-            res = self.weighted_probability(req.x, req.y, req.z)
+        if in_range(req.x, 0, np.size(self.world_env, axis=1) * self.m_per_box) and \
+           in_range(req.y, 0, np.size(self.world_env, axis=0) * self.m_per_box):
+            # x, y, z is in meters. need to correlate x, y meter to cell
+            res = self.weighted_probability(req.x / self.m_per_box, req.y / self.m_per_box, req.z)
             rospy.loginfo("{} - RAW: {}, empty prob: {}".format((req.y * self.max_n + req.x), self.world_env[req.x, req.y], res))
         else:
             rospy.logwarn("Location out of bounds requested")
-            res = 0.0
+            res = 1.0
         return GetMeasurementResponse(res)
 
     def weighted_probability(self, x, y, z):
-        # determine patch of grid that is visible
-        max_box_range = abs(z * math.tan(math.radians(self.camera_fov)))
-        max_box_count = int(max_box_range / self.m_per_box)
-        b_min_x = int(max(x - max_box_count, 0))
-        b_max_x = int(min(x + max_box_count, self.max_n))
-        b_min_y = int(max(y - max_box_count, 0))
-        b_max_y = int(min(y + max_box_count, self.max_n))
-        patch_loc = []
-        for yy in range(b_min_y, b_max_y):
-            for xx in range(b_min_x, b_max_x):
-                patch_loc.append((xx, yy))
-        # extract occlusion for path and find max value
-        val = max([self.occl(self.world_env[xxx, yyy], z) for (xxx, yyy) in patch_loc])
-        return val if (int(y * self.max_n + x) in self.target) else (1.0 - val)
+        val = 0.0
+        # check if our altitude
+        # if below min_z, assume we can see everything
+        # if above max_z, assume we cannot see anything
+        # otherwise, calculate
+        if z > self.min_z and z <= self.max_z:
+            # determine patch of grid that is visible
+            max_box_range = abs(z * math.tan(math.radians(self.camera_fov)))
+            max_box_count = int(max_box_range / self.m_per_box)
+            b_min_x = int(max(x - max_box_count, 0))
+            b_max_x = int(min(x + max_box_count, self.max_n))
+            b_min_y = int(max(y - max_box_count, 0))
+            b_max_y = int(min(y + max_box_count, self.max_n))
+            patch_loc = []
+            for yy in range(b_min_y, b_max_y):
+                for xx in range(b_min_x, b_max_x):
+                    patch_loc.append((xx, yy))
+            # extract occlusion for path and find max value
+            val = max([self.occl(self.world_env[xxx, yyy], z) for (xxx, yyy) in patch_loc])
+            val = val if (int(y * self.max_n + x) in self.target) else (1.0 - val)
+        elif z > self.max_z:
+            val = 1.0
+        else:
+            val = 0.0
+        return val
 
     def occl(self, cell_val, z):
         return (cell_val * (z - self.min_z)) / (self.max_z - self.min_z)
