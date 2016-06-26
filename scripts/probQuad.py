@@ -1,17 +1,16 @@
 import numpy as np
 
-
-class Node:
-    def __init__(self, x_min, x_max, y_min, y_max):
-        self.pn = 0.5
-        self.beta = 0.1
-        self.alpha = 0.1
-        self.visited = False
-
-        self.x_min = x_min
-        self.x_max = x_max
-        self.y_min = y_min
-        self.y_max = y_max
+# class Node:
+    # def __init__(self, x_min, x_max, y_min, y_max):
+    #     self.pn = 0.5
+    #     self.beta = 0.1
+    #     self.alpha = 0.1
+    #     self.visited = False
+    #
+    #     self.x_min = x_min
+    #     self.x_max = x_max
+    #     self.y_min = y_min
+    #     self.y_max = y_max
 
 
 class QuadTree:
@@ -24,6 +23,10 @@ class QuadTree:
         self.y_max = y_max
         self._depth = _depth
         self.prob = 0.5
+
+    def __iter__(self):
+        for child in _loopallchildren(self):
+            yield child
 
     def _split(self, bbox, ref=None, route=None):
         # find cell x_min, x_max, y_min, y_max
@@ -114,21 +117,44 @@ class Root(QuadTree):
                 bbox = (results.x_min, results.x_max, results.y_min, results.y_max)
                 self._split(bbox, results, route)
             if c_level == level:
-                results.prob = measurement
+                if results.prob != 0.5:
+                    if measurement > results.prob:
+                        results.prob = measurement
+                else:
+                    results.prob = measurement
 
     def merge_trees(self, tree2):
         test = True
+        splits = 4
         t1_children = self.children
         t2_children = tree2.children
+
+        def _loopallchildren(parent):
+            for child in parent.children:
+                if child.children:
+                    for subchild in _loopallchildren(child):
+                        yield subchild
+                yield child
+
         while test:
-            for node in t1_children:
+            for node in range(4):
+                if len(t1_children) == len(t2_children):
+                    t1_children = t1_children.children
+                    t2_children = t2_children.children
                 print('TODO')
 
         print('TODO')
 
     def add_measurement_xyz(self, measurement, location_xyz):
         location_xy = location_xyz[0:2]
-        level = 1 # TODO compute the level
+        z = location_xyz[2]
+        level = 0
+        w = self.x_max - self.x_min
+        while (2*np.tan(np.deg2rad(15))*z < w/2**level):
+            level += 1
+        if level == 0:
+            level = 1
+
         self.add_measurement(measurement, location_xy, level)
 
 
@@ -142,28 +168,28 @@ def get_grid_size(area, max_grid):
     return len_bin, num_bins
 
 
-class Map:
-    def __init__(self, bin_len, bin_nums):
-        self.bin_len = bin_len
-        self.num_bins = bin_nums
-        self.q_tree = []
-        for i in range(self.num_bins):
-            col = []
-            for j in range(self.num_bins):
-                x_min = i*bin_len
-                x_max = (i + 1)*bin_len
-                y_min = j*bin_len
-                y_max = (j+1)*bin_len
-                roots = Root(bbox=(x_min, x_max, y_min, y_max))
-                col.append(roots)
-            self.q_tree.append(col)
-
-    def find_tree(self, location):
-        for i in range(self.num_bins):
-            for j in range(self.num_bins):
-                result = self.q_tree[i][j].find_cell(location)
-                if result is not None:
-                    return i, j
+# class Map:
+#     def __init__(self, bin_len, bin_nums):
+#         self.bin_len = bin_len
+#         self.num_bins = bin_nums
+#         self.q_tree = []
+#         for i in range(self.num_bins):
+#             col = []
+#             for j in range(self.num_bins):
+#                 x_min = i*bin_len
+#                 x_max = (i + 1)*bin_len
+#                 y_min = j*bin_len
+#                 y_max = (j+1)*bin_len
+#                 roots = Root(bbox=(x_min, x_max, y_min, y_max))
+#                 col.append(roots)
+#             self.q_tree.append(col)
+#
+#     def find_tree(self, location):
+#         for i in range(self.num_bins):
+#             for j in range(self.num_bins):
+#                 result = self.q_tree[i][j].find_cell(location)
+#                 if result is not None:
+#                     return i, j
 
 
 
@@ -177,6 +203,9 @@ if __name__ == '__main__':
     location = (275, 5)
     location2 = (385, 5)
     measurement = .85
+    location_xyz = (275, 5, 500)
+    q_tree.add_measurement_xyz(measurement, location_xyz)
+    q_tree.add_measurement_xyz(measurement-0.1, location_xyz)
     q_tree.add_measurement(0.8, location, level=3)  # TODO: Add more logic for comparing some at different levels
     q_tree2.add_measurement(0.6, location2, level=2)
 
