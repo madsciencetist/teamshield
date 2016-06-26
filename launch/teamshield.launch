@@ -15,24 +15,28 @@
     <node pkg="teamshield" type="uav" name="uav" output="screen"/>
     <node pkg="teamshield" type="estimator.py" name="estimator" output="screen"/>
     <node pkg="teamshield" type="planner.py" name="planner" output="screen"/>
+    <node pkg="topic_tools" type="relay" name="map_sharer" args="my_qtmap /qtmap_share"/>
   </group>
 
   <group ns="uav1">
     <node pkg="teamshield" type="uav" name="uav"/>
     <node pkg="teamshield" type="estimator.py" name="estimator"/>
     <node pkg="teamshield" type="planner.py" name="planner"/>
+    <node pkg="topic_tools" type="relay" name="map_sharer" args="my_qtmap /qtmap_share"/>
   </group>
 
   <group ns="uav2">
     <node pkg="teamshield" type="uav" name="uav"/>
     <node pkg="teamshield" type="estimator.py" name="estimator"/>
     <node pkg="teamshield" type="planner.py" name="planner"/>
+    <node pkg="topic_tools" type="relay" name="map_sharer" args="my_qtmap /qtmap_share"/>
   </group>
 
   <group ns="uav3">
     <node pkg="teamshield" type="uav" name="uav"/>
     <node pkg="teamshield" type="estimator.py" name="estimator"/>
     <node pkg="teamshield" type="planner.py" name="planner"/>
+    <node pkg="topic_tools" type="relay" name="map_sharer" args="my_qtmap /qtmap_share"/>
   </group>
 
 </launch>

@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import Point
+from std_msgs.msg import String
+from probQuad import *
+import pickle
 
 uav_location = []
 
@@ -22,23 +25,25 @@ class Planner:
       goal.z = 100.0;
       self.goal_pub.publish(goal)
       
-  def uav1_location_call(self, msg):
-      print(msg)
+  def qtmap_callback(self, qtmap_msg):
+      self.q_tree = pickle.loads(qtmap_msg.data)
       
   def __init__(self):
 
       rospy.init_node('estimator')
-      
-      self.current_location_sub = rospy.Subscriber("current_location", Point, self.current_location_callback)
-      
       self.swarm_size = rospy.get_param('/swarm_size')
       
-      self.pose_sub = []
+      self.q_tree = Root(bbox=(0, 500, 0, 500))
       
+      self.pose_sub = []
       for i in range(0, self.swarm_size):
         uav_location.append(Point())
         callback = create_uav_location_callback(i)
         self.pose_sub.append(rospy.Subscriber("/uav" + str(i) + "/current_location", Point, callback))
+        
+      self.current_location_sub = rospy.Subscriber("current_location", Point, self.current_location_callback)
+      
+      self.map_sub = rospy.Subscriber("my_qtmap", String, self.qtmap_callback)
       
       self.goal_pub = rospy.Publisher('goal', Point, queue_size=1)
 
