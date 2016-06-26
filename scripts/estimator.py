@@ -7,6 +7,7 @@ from probQuad import *
 import StringIO
 import pickle
 
+
 class Estimator:
     def current_location_callback(self, current_location):
         rospy.loginfo("I am at %f %f %f", current_location.x, current_location.y, current_location.z);
@@ -24,21 +25,27 @@ class Estimator:
             self.q_tree.add_measurement_xyz(response.measurement, location_xyz)
 
             # Send map
-            output = StringIO.StringIO()
-            pickle.dump(self.q_tree, output)
-            qtmap_msg = output.getvalue()
+            qtmap_msg = pickle.dumps(self.q_tree)
             self.map_pub.publish(qtmap_msg)
+            
+    def qtmap_callback(self, qtmap_msg):
+        qtmap = pickle.loads(qtmap_msg.data)
+        #self.q_tree.merge_trees(qtmap) uncomment this when merge_trees is done
 
     def __init__(self):
 
         rospy.init_node('estimator')
+        
+        self.q_tree = Root(bbox=(0, 500, 0, 500))
 
         self.loc_sub = rospy.Subscriber("current_location", Point, self.current_location_callback)
-        self.map_pub = rospy.Publisher('qtmap', String, queue_size=1)
+        self.map_sub = rospy.Subscriber("/qtmap", String, self.qtmap_callback)
+        self.map_pub = rospy.Publisher('/qtmap', String, queue_size=1)
 
         self.get_measurement = rospy.ServiceProxy('/get_measurement', GetMeasurement)
 
-        self.q_tree = Root(bbox=(0, 500, 0, 500))
+       
+
       
 
 if __name__ == '__main__':
