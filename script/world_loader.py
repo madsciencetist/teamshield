@@ -10,11 +10,12 @@ from teamshield.srv import GetMeasurement, GetMeasurementResponse
 
 class WorldLoader:
     def __init__(self):
-        filename = rospy.get_param("/worldfile", "/home/kenny/world.csv")
+        self.min_z = rospy.get_param("/min_z", 1)  # altitude
+        self.max_z = rospy.get_param("/max_z", 1)  # altitude
+        self.axis_size = rospy.get_param("/axis_size", 128)
         # Assumption: Data loaded row-major
-        self.world_array = genfromtxt(filename, delimiter=",")
+        self.world_array = self.generate_world(max_n=self.axis_size)
         self.meas_srv = rospy.Service("get_measurement", GetMeasurement, self.get_measurement)
-        print(self.world_array)
 
     def get_measurement(self, req):
         res = 0.0
@@ -26,8 +27,28 @@ class WorldLoader:
             res = 0.0
         return GetMeasurementResponse(res)
 
+    def generate_world(self, num_centers=8, max_n=128):
+        X = np.zeros((max_n * max_n, 2))
+        centers = np.random.rand(num_centers, 2)
+        widths = np.random.rand(num_centers, 1) / 48
+        occlusion = np.zeros(max_n * max_n)
+        result = np.zeros((max_n, max_n))
+        for i in range(max_n):
+            for j in range(max_n):
+                n = i * max_n + j
+                for k in range(num_centers):
+                    occlusion[n] += np.exp(np.power(-np.linalg.norm(centers[k,:]-X[n,:]), 2)/widths[k])
+
+        max_val = 1.3 * max(occlusion)
+
+        for i in range(max_n):
+            for j in range(max_n):
+                n = i * max_n + j
+                tmp = occlusion[n]/max_val;
+                result[i, j] = tmp
+        return result
+
 if __name__ == "__main__":
     rospy.init_node("world_loader")
     world_loader = WorldLoader()
     rospy.spin()
-
