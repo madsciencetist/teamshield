@@ -123,10 +123,10 @@ class Root(QuadTree):
 
         print(c_level)
 
-    def add_measurement(self, measurement, location_xyz):
+    def add_measurement_xyz(self, measurement, location_xyz):
         location_xy = location_xyz[0:2]
         level = 1 # TODO compute the level
-        add_measurement(measurement, location_xy, level)
+        self.add_measurement(measurement, location_xy, level)
 
 
 
