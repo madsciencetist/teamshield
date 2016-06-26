@@ -23,7 +23,7 @@ class Estimator:
 
       rospy.Subscriber("current_location", Point, self.current_location_callback)
       
-      self.get_measurement = rospy.ServiceProxy('get_measurement', GetMeasurement)
+      self.get_measurement = rospy.ServiceProxy('/get_measurement', GetMeasurement)
 
 if __name__ == '__main__':
     Estimator()
