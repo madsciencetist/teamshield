@@ -18,7 +18,9 @@ void timerCallback(const ros::TimerEvent& e)
   double dt = (e.current_real - e.last_real).toSec();
 
   Eigen::Vector3d travel_vector = goal - current_location;
-  travel_vector.normalize();
+  if(travel_vector.norm() > 1) {
+    travel_vector.normalize();
+  }
 
   double max_speed = 5.0; // meters per second
   double climb_rate = 0.5; // meters per second
@@ -28,8 +30,8 @@ void timerCallback(const ros::TimerEvent& e)
 
   if(velocity[2] > climb_rate)
     velocity[2] = climb_rate;
-  else if(velocity[2] < descent_rate)
-    velocity[2] = descent_rate;
+  else if(velocity[2] < -descent_rate)
+    velocity[2] = -descent_rate;
 
   current_location += velocity * dt;
 
@@ -51,7 +53,7 @@ int main(int argc, char **argv)
 
   ros::Subscriber goal_sub = nh.subscribe("goal", 1, goalCallback);
   current_location_pub = nh.advertise<geometry_msgs::Point>("current_location", 0);
-  ros::Timer timer = nh.createTimer(ros::Duration(0.01), timerCallback);
+  ros::Timer timer = nh.createTimer(ros::Duration(0.1), timerCallback);
 
   ros::spin();
 
