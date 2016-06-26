@@ -109,7 +109,7 @@ class Root(QuadTree):
     def find_cell(self, location):
         return self._find_cell(location)
 
-    def add_measurement(self, location, level):
+    def add_measurement(self, measurement, location, level):
         c_level = -1
         while c_level < level:
             results, c_level, route = self._find_cell(location)
@@ -123,8 +123,10 @@ class Root(QuadTree):
 
         print(c_level)
 
-
-
+    def add_measurement(self, measurement, location_xyz)
+        location_xy = location_xyz(0:2)
+        level = 1 # TODO compute the level
+        add_measurement(measurement, location_xy, level):
 
 
 
