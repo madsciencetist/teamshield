@@ -25,7 +25,7 @@ class QuadTree:
         self._depth = _depth
         self.prob = 1
 
-    def _split(self, bbox, ref=None):
+    def _split(self, bbox, ref=None, route=None):
         # find cell x_min, x_max, y_min, y_max
         x_min, x_max, y_min, y_max = bbox
         width = x_max - x_min
@@ -34,8 +34,8 @@ class QuadTree:
         halfwidth = width / 2.0
         halfheight = height / 2.0
 
-        new_depth = self._depth + 1
         if ref is None:
+            new_depth = self._depth + 1
             self.children = [QuadTree(x_min, x_min + halfwidth, y_min, y_min + halfheight, _depth=new_depth),
                              QuadTree(x_min+halfwidth, x_max, y_min, y_min+halfheight, _depth=new_depth),
                              QuadTree(x_min, x_min + halfwidth, y_min+halfheight, y_max, _depth=new_depth),
@@ -45,6 +45,7 @@ class QuadTree:
             for node in self.children:
                 node.prob = pn
         else:
+            new_depth = len(route)+1
             ref.children = [QuadTree(x_min, x_min + halfwidth, y_min, y_min + halfheight, _depth=new_depth),
                              QuadTree(x_min+halfwidth, x_max, y_min, y_min+halfheight, _depth=new_depth),
                              QuadTree(x_min, x_min + halfwidth, y_min+halfheight, y_max, _depth=new_depth),
@@ -53,6 +54,9 @@ class QuadTree:
             pn = ref.prob/4
             for node in ref.children:
                 node.prob = pn
+
+            # for r in route:
+            #     self.children[r]
 
 
 
@@ -71,19 +75,29 @@ class QuadTree:
             return None, level, quarter
 
         quarter = 0
-        for child in self.children:
-            if (child.x_min <= location[0] and child.x_max >= location[0] and \
-                            child.y_min <= location[1] and child.y_max >= location[1]):
-                if len(child.children) == 0:
-                    # No children this is the leaf node
-                    results = child
-                    level = child._depth
-                    return results, level, quarter
-                else:
-                    children = child.children
-            quarter += 1
+        route = []
+        children = self.children
 
-        return results, level, quarter
+        has_children = True
+        while has_children:
+            for child in children:
+                if (child.x_min <= location[0] and child.x_max >= location[0] and \
+                                child.y_min <= location[1] and child.y_max >= location[1]):
+                    if len(child.children) == 0:
+                        # No children this is the leaf node
+                        results = child
+                        level = child._depth
+                        route.append(quarter)
+                        has_children = False
+                        return results, level, route
+                    else:
+                        children = child.children
+                        route.append(quarter)
+                        quarter = 0
+                        break
+                quarter += 1
+
+        return results, level, route
 
 
 
@@ -98,13 +112,16 @@ class Root(QuadTree):
     def add_measurement(self, measurement, location, level):
         c_level = -1
         while c_level < level:
-            results, c_level = self._find_cell(location)
+            results, c_level, route = self._find_cell(location)
+            print(c_level)
             if results is None:
                 bbox = (self.x_min, self.x_max, self.y_min, self.y_max)
                 self._split(bbox)
             elif c_level < level:
                 bbox = (results.x_min, results.x_max, results.y_min, results.y_max)
-                self._split(bbox, results)
+                self._split(bbox, results, route)
+
+        print(c_level)
 
     def add_measurement(self, measurement, location_xyz):
         location_xy = location_xyz[0:2]
@@ -154,9 +171,9 @@ if __name__ == '__main__':
     max_top_grid = 10
 
     q_tree = Root(bbox=(0, 500, 0, 500))
-    location = (2, 5)
+    location = (275, 5)
 
-    q_tree.add_measurement(location, level=2)
+    q_tree.add_measurement(location, level=3)
     # q_tree.get_Probability(x, y)
     #
     # len_bin, num_bins = get_grid_size(total_area, max_top_grid)

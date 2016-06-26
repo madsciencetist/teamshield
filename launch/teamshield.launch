@@ -2,6 +2,10 @@
 
 <launch>
   <param name="/swarm_size" value="4"/>
+  <param name="/filename" value="$(find teamshield)/files/occlusion.csv"/>
+  <param name="/min_z" value="1500"/>
+  <param name="/max_z" value="9800"/>
+  <param name="/max_n" value="128"/>
 
   <node pkg="teamshield" type="world_loader.py" name="world_loader"/>
 
