@@ -94,7 +94,7 @@ class QuadTree:
 class Root(QuadTree):
     def __init__(self, bbox, max_depth=10):
         x_min, x_max, y_min, y_max = bbox
-        super(Root, self).__init__(x_min, x_max, y_min, y_max, max_depth)
+        QuadTree.__init__(self, x_min, x_max, y_min, y_max, max_depth)
 
     def find_cell(self, location):
         return self._find_cell(location)
@@ -125,11 +125,12 @@ class Root(QuadTree):
                 print('TODO')
 
         print('TODO')
-#
-# def add_measurement(self, measurement, location_xyz)
-#     location_xy = location_xyz(0:2)
-#     level = 1 # TODO compute the level
-#     add_measurement(measurement, location_xy, level):
+
+    def add_measurement_xyz(self, measurement, location_xyz):
+        location_xy = location_xyz[0:2]
+        level = 1 # TODO compute the level
+        self.add_measurement(measurement, location_xy, level)
+
 
 def get_grid_size(area, max_grid):
     side = np.sqrt(area)
