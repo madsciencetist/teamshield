@@ -2,19 +2,27 @@
 
 <launch>
   <group ns="uav1">
-    <node pkg="teamshield" type="uav" name="uav">
+    <node pkg="teamshield" type="uav" name="uav" output="screen"/>
+    <node pkg="teamshield" type="estimator.py" name="estimator" output="screen"/>
+    <node pkg="teamshield" type="planner.py" name="planner" output="screen"/>
   </group>
 
   <group ns="uav2">
-    <node pkg="teamshield" type="uav" name="uav">
+    <node pkg="teamshield" type="uav" name="uav"/>
+    <node pkg="teamshield" type="estimator.py" name="estimator"/>
+    <node pkg="teamshield" type="planner.py" name="planner"/>
   </group>
 
   <group ns="uav3">
-    <node pkg="teamshield" type="uav" name="uav">
+    <node pkg="teamshield" type="uav" name="uav"/>
+    <node pkg="teamshield" type="estimator.py" name="estimator"/>
+    <node pkg="teamshield" type="planner.py" name="planner"/>
   </group>
 
   <group ns="uav4">
-    <node pkg="teamshield" type="uav" name="uav">
+    <node pkg="teamshield" type="uav" name="uav"/>
+    <node pkg="teamshield" type="estimator.py" name="estimator"/>
+    <node pkg="teamshield" type="planner.py" name="planner"/>
   </group>
 
 </launch>
