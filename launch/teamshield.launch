@@ -4,7 +4,7 @@
   <param name="/swarm_size" value="4"/>
   <param name="/filename" value="$(find teamshield)/files/occlusion.csv"/>
   <param name="/min_z" value="100"/>        # m
-  <param name="/max_z" value="500"/>        # m
+  <param name="/max_z" value="600"/>        # m
   <param name="/max_n" value="128"/>        # max num of cells row/column
   <param name="/camera_fov" value="135"/>   # degree
   <param name="/m_per_box" value="5"/>      # m
