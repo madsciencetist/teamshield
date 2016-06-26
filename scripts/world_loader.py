@@ -17,16 +17,16 @@ def in_range(val, min, max):
 class WorldLoader:
     def __init__(self):
         filename = os.path.abspath(rospy.get_param("/filename", "files/occlusion.csv"))
-        self.min_z = rospy.get_param("/min_z", 1500.)
-        self.max_z = rospy.get_param("/max_z", 9800.)
+        self.min_z = rospy.get_param("/min_z", 100.)
+        self.max_z = rospy.get_param("/max_z", 600.)
         self.max_n = rospy.get_param("/max_n", 128)
-        self.camera_fov = rospy.get_param("/camera_fov", 135.)
+        self.camera_fov = rospy.get_param("/camera_fov", 30.)
         self.m_per_box = rospy.get_param("/m_per_box", 5.)
         self.bound_dist = self.max_n * self.m_per_box
         # Assumption: Data loaded row-major
         self.world_env = genfromtxt(filename, delimiter=",")
         self.target = self.generate_targets(8)
-        self.meas_srv = rospy.Service("get_measurement", GetMeasurement, self.get_measurement)
+        self.meas_srv = rospy.Service("/get_measurement", GetMeasurement, self.get_measurement)
 
     def get_measurement(self, req):
         res = 0.0
