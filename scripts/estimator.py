@@ -4,7 +4,6 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import String
 from teamshield.srv import GetMeasurement
 from probQuad import *
-import StringIO
 import pickle
 
 
@@ -39,8 +38,8 @@ class Estimator:
         self.q_tree = Root(bbox=(0, 500, 0, 500))
 
         self.loc_sub = rospy.Subscriber("current_location", Point, self.current_location_callback)
-        self.map_sub = rospy.Subscriber("/qtmap", String, self.qtmap_callback)
-        self.map_pub = rospy.Publisher('/qtmap', String, queue_size=1)
+        self.map_sub = rospy.Subscriber("/qtmap_share", String, self.qtmap_callback)
+        self.map_pub = rospy.Publisher('my_qtmap', String, queue_size=1)
 
         self.get_measurement = rospy.ServiceProxy('/get_measurement', GetMeasurement)
 
