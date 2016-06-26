@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import Point
+from std_msgs.msg import String
 from teamshield.srv import GetMeasurement
 from probQuad import *
+import StringIO
+import pickle
 
 class Estimator:
     def current_location_callback(self, current_location):
@@ -18,14 +21,20 @@ class Estimator:
                 return
 
             location_xyz = (current_location.x, current_location.y, current_location.z)
-            self.q_tree.add_measurement(response.measurement, location_xyz)
+            self.q_tree.add_measurement_xyz(response.measurement, location_xyz)
 
+            # Send map
+            output = StringIO.StringIO()
+            pickle.dump(self.q_tree, output)
+            qtmap_msg = output.getvalue()
+            self.map_pub.publish(qtmap_msg)
 
     def __init__(self):
 
         rospy.init_node('estimator')
 
-        rospy.Subscriber("current_location", Point, self.current_location_callback)
+        self.loc_sub = rospy.Subscriber("current_location", Point, self.current_location_callback)
+        self.map_pub = rospy.Publisher('qtmap', String, queue_size=1)
 
         self.get_measurement = rospy.ServiceProxy('/get_measurement', GetMeasurement)
 
